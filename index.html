@@ -1,0 +1,886 @@
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pegasus Representações</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #0ea5e9;
+        }
+        
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        .nav-link {
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-1px);
+            color: #0ea5e9;
+        }
+        
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        .logo-img {
+            filter: drop-shadow(0 10px 8px rgb(14 165 233 / 0.3));
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .modal {
+            animation: modalPop 0.3s ease;
+        }
+        
+        @keyframes modalPop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100">
+    <!-- NAVBAR GLOBAL -->
+    <nav class="bg-zinc-900 border-b border-zinc-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            
+            <!-- LOGO -->
+            <div onclick="showPage('home')" class="flex items-center gap-3 cursor-pointer">
+                <img id="logo-nav" src="https://i.ibb.co/KxncsGgR/ZMUGd.jpg" 
+                     alt="Pegasus Representações" class="logo-img w-10 h-10 object-contain rounded-xl">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-sky-400">PEGASUS</h1>
+                    <p class="text-xs text-zinc-400 -mt-1">REPRESENTAÇÕES</p>
+                </div>
+            </div>
+
+            <!-- MENU -->
+            <div class="flex items-center gap-8 text-sm font-medium">
+                <a onclick="showPage('home')" class="nav-link flex items-center gap-1 cursor-pointer">
+                    🏠 Início
+                </a>
+                <a onclick="showPage('loja')" class="nav-link flex items-center gap-1 cursor-pointer">
+                    🛒 Loja
+                </a>
+                <a onclick="showPage('categorias')" class="nav-link flex items-center gap-1 cursor-pointer">
+                    📂 Categorias
+                </a>
+                <a onclick="showPage('carrinho')" class="nav-link flex items-center gap-1 cursor-pointer relative">
+                    🛍️ Carrinho
+                    <span id="cart-count-badge" 
+                          class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                    </span>
+                </a>
+                
+                <!-- ÍCONE ADMIN -->
+                <a onclick="showAdmin()" 
+                   class="nav-link flex items-center gap-1 cursor-pointer px-4 py-2 rounded-2xl hover:bg-zinc-800">
+                    ⚙️ Admin
+                </a>
+            </div>
+
+            <!-- BOTÃO ACESSO CLIENTE (sempre visível) -->
+            <div onclick="showPage('loja')" 
+                 class="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-2xl font-semibold flex items-center gap-2 cursor-pointer transition-all">
+                <span>👤 Acesso Cliente</span>
+                <span class="text-xl">→</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+
+        <!-- ====================== PÁGINA INICIAL ====================== -->
+        <div id="home" class="section active">
+            <div class="min-h-[80vh] flex items-center justify-center">
+                <div class="text-center max-w-2xl">
+                    <img src="https://i.ibb.co/KxncsGgR/ZMUGd.jpg" 
+                         alt="Pegasus Representações" 
+                         class="mx-auto w-72 h-72 object-contain logo-img mb-8">
+                    
+                    <h1 class="text-6xl font-bold tracking-tighter mb-4 text-white">
+                        PEGASUS<br>REPRESENTAÇÕES
+                    </h1>
+                    <p class="text-xl text-zinc-400 mb-12">
+                        Sua loja de confiança para os melhores produtos
+                    </p>
+                    
+                    <button onclick="showPage('loja')" 
+                            class="bg-white text-zinc-950 text-2xl font-semibold px-16 py-6 rounded-3xl hover:scale-105 transition-all flex items-center gap-4 mx-auto shadow-2xl shadow-sky-500/30">
+                        ENTRAR NA LOJA
+                        <span class="text-4xl">🛒</span>
+                    </button>
+                    
+                    <p class="mt-8 text-zinc-500 text-sm">Clique no ícone de cliente acima ou no botão para começar</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====================== PÁGINA LOJA ====================== -->
+        <div id="loja" class="section">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-4xl font-bold">Loja Pegasus</h2>
+                
+                <!-- BARRA DE PESQUISA -->
+                <div class="flex-1 max-w-md mx-8">
+                    <div class="relative">
+                        <input id="search-input" 
+                               onkeyup="if(event.key === 'Enter') filterProducts()"
+                               type="text" 
+                               placeholder="🔎 Buscar produtos..." 
+                               class="w-full bg-zinc-900 border border-zinc-700 focus:border-sky-500 rounded-3xl py-4 px-6 text-lg outline-none">
+                        <button onclick="filterProducts()" 
+                                class="absolute right-3 top-1/2 -translate-y-1/2 bg-sky-500 hover:bg-sky-600 text-white px-8 py-3 rounded-3xl text-sm font-medium">
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARRINHO NO TOPO DA LOJA -->
+                <button onclick="showPage('carrinho')" 
+                        class="flex items-center gap-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 px-8 py-4 rounded-3xl">
+                    <span class="text-3xl">🛍️</span>
+                    <div>
+                        <span class="font-medium">Carrinho</span>
+                        <span id="cart-count-top" class="text-sky-400 font-bold ml-1"></span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- CATEGORIAS EM DESTAQUE -->
+            <div class="flex gap-3 mb-8 flex-wrap" id="category-pills">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <!-- GRID DE PRODUTOS -->
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+
+        <!-- ====================== PÁGINA CATEGORIAS ====================== -->
+        <div id="categorias" class="section">
+            <h2 class="text-4xl font-bold mb-8">Gerenciar Categorias</h2>
+            <div class="bg-zinc-900 rounded-3xl p-8">
+                <div class="flex gap-4 mb-6">
+                    <input id="new-category-input" type="text" 
+                           class="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4 outline-none focus:border-sky-500"
+                           placeholder="Nome da nova categoria...">
+                    <button onclick="addCategory()" 
+                            class="bg-sky-500 hover:bg-sky-600 px-10 rounded-3xl font-semibold">
+                        ➕ Adicionar Categoria
+                    </button>
+                </div>
+                <div id="categories-list" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ====================== PÁGINA CARRINHO ====================== -->
+        <div id="carrinho" class="section">
+            <h2 class="text-4xl font-bold mb-8 flex items-center gap-3">
+                <span>🛍️</span> Seu Carrinho
+            </h2>
+            
+            <div id="cart-empty" class="hidden text-center py-20">
+                <div class="text-8xl mb-6">🛒</div>
+                <h3 class="text-3xl font-medium text-zinc-400">Seu carrinho está vazio</h3>
+                <p class="text-zinc-500 mt-3">Adicione alguns produtos da loja!</p>
+                <button onclick="showPage('loja')" 
+                        class="mt-8 bg-white text-zinc-950 px-10 py-4 rounded-3xl font-semibold">
+                    Ir para a Loja
+                </button>
+            </div>
+
+            <div id="cart-content" class="hidden">
+                <div id="cart-items" class="space-y-6 mb-12">
+                    <!-- Preenchido via JS -->
+                </div>
+
+                <div class="bg-zinc-900 rounded-3xl p-8 flex justify-between items-end">
+                    <div>
+                        <p class="text-zinc-400">Total do pedido</p>
+                        <p id="cart-total" class="text-5xl font-bold text-white">R$ 0,00</p>
+                    </div>
+                    <button onclick="enviarPedidoWhatsApp()" 
+                            class="bg-green-500 hover:bg-green-600 text-white text-2xl font-bold px-16 py-6 rounded-3xl flex items-center gap-4">
+                        ENVIAR PEDIDO PELO WHATSAPP
+                        <span class="text-4xl">📱</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====================== PAINEL ADMIN ====================== -->
+        <div id="admin" class="section">
+            <!-- Tela de Login -->
+            <div id="admin-login">
+                <div class="max-w-md mx-auto bg-zinc-900 rounded-3xl p-12 text-center mt-20">
+                    <div class="mx-auto w-20 h-20 bg-sky-500 rounded-2xl flex items-center justify-center text-5xl mb-8">⚙️</div>
+                    <h2 class="text-4xl font-bold mb-2">Painel Administrativo</h2>
+                    <p class="text-zinc-400 mb-10">Apenas para a equipe Pegasus</p>
+                    
+                    <input id="admin-user" type="text" value="admin" placeholder="Usuário" 
+                           class="w-full mb-4 bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-5 outline-none">
+                    <input id="admin-pass" type="password" value="pegasus123" placeholder="Senha" 
+                           class="w-full mb-8 bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-5 outline-none">
+                    
+                    <button onclick="fazerLoginAdmin()" 
+                            class="w-full bg-white text-zinc-950 py-5 rounded-3xl font-bold text-xl hover:bg-sky-400 transition-colors">
+                        ENTRAR NO PAINEL
+                    </button>
+                    <p class="text-xs text-zinc-500 mt-6">Usuário: <span class="font-mono">admin</span> • Senha: <span class="font-mono">pegasus123</span></p>
+                </div>
+            </div>
+
+            <!-- Painel Admin Logado -->
+            <div id="admin-panel" class="hidden">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-4xl font-bold">Painel Administrativo</h2>
+                    <button onclick="logoutAdmin()" 
+                            class="text-red-400 hover:text-red-500 flex items-center gap-2">
+                        Sair <span class="text-xl">→</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <!-- Card Cadastro Produto -->
+                    <div onclick="showAdminSection('produtos')" 
+                         class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 p-8 rounded-3xl cursor-pointer transition-all">
+                        <div class="text-6xl mb-6">📦</div>
+                        <h3 class="text-2xl font-semibold">Cadastro de Produtos</h3>
+                        <p class="text-zinc-400">Adicione novos itens à loja</p>
+                    </div>
+                    
+                    <!-- Card Cadastro Cliente -->
+                    <div onclick="showAdminSection('clientes')" 
+                         class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 p-8 rounded-3xl cursor-pointer transition-all">
+                        <div class="text-6xl mb-6">👤</div>
+                        <h3 class="text-2xl font-semibold">Cadastro de Clientes</h3>
+                        <p class="text-zinc-400">Gerencie seus clientes</p>
+                    </div>
+                    
+                    <!-- Card Categorias -->
+                    <div onclick="showPage('categorias')" 
+                         class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 p-8 rounded-3xl cursor-pointer transition-all">
+                        <div class="text-6xl mb-6">📂</div>
+                        <h3 class="text-2xl font-semibold">Categorias</h3>
+                        <p class="text-zinc-400">Gerencie as categorias da loja</p>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO CADASTRO PRODUTOS -->
+                <div id="admin-produtos" class="hidden">
+                    <h3 class="text-3xl font-semibold mb-6">Cadastro de Produtos</h3>
+                    <div class="bg-zinc-900 rounded-3xl p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm text-zinc-400 mb-2">Nome do produto</label>
+                            <input id="prod-nome" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                            
+                            <label class="block text-sm text-zinc-400 mt-6 mb-2">URL da imagem</label>
+                            <input id="prod-imagem" type="text" placeholder="https://..." 
+                                   oninput="previewImagemProduto()" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                            
+                            <div id="prod-preview" class="mt-4 h-48 border border-dashed border-zinc-700 rounded-3xl flex items-center justify-center overflow-hidden">
+                                <span class="text-zinc-500 text-sm">Pré-visualização aparecerá aqui</span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm text-zinc-400 mb-2">Preço (R$)</label>
+                                    <input id="prod-preco" type="number" step="0.01" value="99.90" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-zinc-400 mb-2">Tabela 1</label>
+                                    <input id="prod-t1" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-zinc-400 mb-2">Tabela 2</label>
+                                    <input id="prod-t2" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-zinc-400 mb-2">Tabela 3</label>
+                                    <input id="prod-t3" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm text-zinc-400 mb-2">Categoria</label>
+                                    <select id="prod-categoria" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                                        <!-- preenchido via JS -->
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button onclick="cadastrarProduto()" 
+                                    class="mt-8 w-full bg-emerald-500 hover:bg-emerald-600 text-white py-6 text-xl font-semibold rounded-3xl">
+                                ✅ CADASTRAR PRODUTO
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de produtos cadastrados -->
+                    <h4 class="font-semibold text-xl mt-16 mb-6">Produtos Cadastrados</h4>
+                    <div id="lista-produtos-admin" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <!-- JS -->
+                    </div>
+                </div>
+
+                <!-- SEÇÃO CADASTRO CLIENTES -->
+                <div id="admin-clientes" class="hidden">
+                    <h3 class="text-3xl font-semibold mb-6">Cadastro de Clientes</h3>
+                    <div class="bg-zinc-900 rounded-3xl p-8">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm text-zinc-400 mb-2">Nome completo</label>
+                                <input id="cli-nome" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-zinc-400 mb-2">Telefone (com DDD)</label>
+                                <input id="cli-telefone" type="tel" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-sm text-zinc-400 mb-2">Endereço completo</label>
+                                <input id="cli-endereco" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-zinc-400 mb-2">Login</label>
+                                <input id="cli-login" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-zinc-400 mb-2">Senha</label>
+                                <input id="cli-senha" type="password" class="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-6 py-4">
+                            </div>
+                        </div>
+                        <button onclick="cadastrarCliente()" 
+                                class="mt-8 bg-emerald-500 hover:bg-emerald-600 text-white py-6 text-xl font-semibold rounded-3xl w-full">
+                            ✅ CADASTRAR CLIENTE
+                        </button>
+                    </div>
+                    
+                    <h4 class="font-semibold text-xl mt-16 mb-6">Clientes Cadastrados</h4>
+                    <div id="lista-clientes-admin" class="space-y-4">
+                        <!-- JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONFIGURAÇÃO TAILWIND ====================
+        function initTailwind() {
+            tailwind.config = {
+                content: [],
+                theme: {
+                    extend: {}
+                }
+            }
+        }
+
+        // ==================== VARIÁVEIS GLOBAIS ====================
+        let produtos = JSON.parse(localStorage.getItem('pegasus_produtos')) || []
+        let categorias = JSON.parse(localStorage.getItem('pegasus_categorias')) || ["Eletrônicos", "Ferramentas", "Automotivo", "Casa"]
+        let carrinho = JSON.parse(localStorage.getItem('pegasus_carrinho')) || []
+        let clientes = JSON.parse(localStorage.getItem('pegasus_clientes')) || []
+        let usuarioAdminLogado = false
+
+        // ==================== FUNÇÕES DE NAVEGAÇÃO ====================
+        function showPage(page) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'))
+            const target = document.getElementById(page)
+            if (target) target.classList.add('active')
+            
+            // Atualiza carrinho sempre que muda de página
+            if (page === 'loja') renderizarProdutos()
+            if (page === 'carrinho') renderizarCarrinho()
+            if (page === 'categorias') renderizarCategorias()
+        }
+
+        // ==================== ADMIN ====================
+        function showAdmin() {
+            if (usuarioAdminLogado) {
+                document.getElementById('admin-login').classList.add('hidden')
+                document.getElementById('admin-panel').classList.remove('hidden')
+                showAdminSection('produtos')
+            } else {
+                showPage('admin')
+                document.getElementById('admin-login').classList.remove('hidden')
+                document.getElementById('admin-panel').classList.add('hidden')
+            }
+        }
+
+        function fazerLoginAdmin() {
+            const user = document.getElementById('admin-user').value
+            const pass = document.getElementById('admin-pass').value
+            
+            if (user === 'admin' && pass === 'pegasus123') {
+                usuarioAdminLogado = true
+                document.getElementById('admin-login').classList.add('hidden')
+                document.getElementById('admin-panel').classList.remove('hidden')
+                showAdminSection('produtos')
+                carregarSelectCategorias()
+            } else {
+                alert('❌ Usuário ou senha incorretos!')
+            }
+        }
+
+        function logoutAdmin() {
+            usuarioAdminLogado = false
+            showPage('home')
+        }
+
+        function showAdminSection(section) {
+            document.getElementById('admin-produtos').classList.add('hidden')
+            document.getElementById('admin-clientes').classList.add('hidden')
+            
+            if (section === 'produtos') {
+                document.getElementById('admin-produtos').classList.remove('hidden')
+                renderizarListaProdutosAdmin()
+            }
+            if (section === 'clientes') {
+                document.getElementById('admin-clientes').classList.remove('hidden')
+                renderizarListaClientesAdmin()
+            }
+        }
+
+        // ==================== PRODUTOS ====================
+        function previewImagemProduto() {
+            const url = document.getElementById('prod-imagem').value
+            const previewDiv = document.getElementById('prod-preview')
+            
+            if (url) {
+                previewDiv.innerHTML = `<img src="${url}" class="max-h-full max-w-full object-contain">`
+            } else {
+                previewDiv.innerHTML = `<span class="text-zinc-500 text-sm">Pré-visualização aparecerá aqui</span>`
+            }
+        }
+
+        function cadastrarProduto() {
+            const nome = document.getElementById('prod-nome').value.trim()
+            const imagem = document.getElementById('prod-imagem').value.trim()
+            const preco = parseFloat(document.getElementById('prod-preco').value) || 0
+            const t1 = document.getElementById('prod-t1').value.trim()
+            const t2 = document.getElementById('prod-t2').value.trim()
+            const t3 = document.getElementById('prod-t3').value.trim()
+            const categoria = document.getElementById('prod-categoria').value
+
+            if (!nome || !imagem || preco <= 0) {
+                alert('Preencha nome, imagem e preço!')
+                return
+            }
+
+            const novoProduto = {
+                id: Date.now(),
+                nome,
+                imagem,
+                preco,
+                tabela1: t1,
+                tabela2: t2,
+                tabela3: t3,
+                categoria
+            }
+
+            produtos.push(novoProduto)
+            localStorage.setItem('pegasus_produtos', JSON.stringify(produtos))
+            
+            // Limpa formulário
+            document.getElementById('prod-nome').value = ''
+            document.getElementById('prod-imagem').value = ''
+            document.getElementById('prod-preco').value = '99.90'
+            document.getElementById('prod-t1').value = ''
+            document.getElementById('prod-t2').value = ''
+            document.getElementById('prod-t3').value = ''
+            document.getElementById('prod-preview').innerHTML = `<span class="text-zinc-500 text-sm">Pré-visualização aparecerá aqui</span>`
+            
+            alert('✅ Produto cadastrado com sucesso!')
+            renderizarProdutos()
+            renderizarListaProdutosAdmin()
+        }
+
+        function renderizarProdutos(filtro = '') {
+            const grid = document.getElementById('products-grid')
+            grid.innerHTML = ''
+
+            const produtosFiltrados = produtos.filter(p => {
+                const matchNome = p.nome.toLowerCase().includes(filtro.toLowerCase())
+                const matchCategoria = filtro === '' || p.categoria.toLowerCase().includes(filtro.toLowerCase())
+                return matchNome || matchCategoria
+            })
+
+            if (produtosFiltrados.length === 0) {
+                grid.innerHTML = `
+                <div class="col-span-full text-center py-20 text-zinc-400">
+                    <p class="text-2xl">Nenhum produto encontrado 😔</p>
+                </div>`
+                return
+            }
+
+            produtosFiltrados.forEach(prod => {
+                const card = document.createElement('div')
+                card.className = 'product-card bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden'
+                card.innerHTML = `
+                <div class="h-56 bg-zinc-800 flex items-center justify-center p-4">
+                    <img src="${prod.imagem}" class="max-h-52 object-contain rounded-2xl" alt="${prod.nome}">
+                </div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-semibold text-xl line-clamp-2">${prod.nome}</h4>
+                        <span class="text-emerald-400 font-bold text-2xl">R$ ${prod.preco.toFixed(2)}</span>
+                    </div>
+                    <p class="text-sky-400 text-sm mt-1">${prod.categoria}</p>
+                    
+                    <div class="mt-4 text-xs text-zinc-400 grid grid-cols-3 gap-1">
+                        <div>T1: ${prod.tabela1 || '-'}</div>
+                        <div>T2: ${prod.tabela2 || '-'}</div>
+                        <div>T3: ${prod.tabela3 || '-'}</div>
+                    </div>
+                    
+                    <button onclick="adicionarAoCarrinho(${prod.id}); event.stopImmediatePropagation()" 
+                            class="mt-6 w-full bg-white text-zinc-950 py-4 rounded-3xl font-semibold hover:bg-emerald-400 transition-colors">
+                        + Adicionar ao Carrinho
+                    </button>
+                </div>`
+                grid.appendChild(card)
+            })
+        }
+
+        function filterProducts() {
+            const termo = document.getElementById('search-input').value
+            renderizarProdutos(termo)
+        }
+
+        function adicionarAoCarrinho(id) {
+            const produto = produtos.find(p => p.id === id)
+            if (!produto) return
+
+            const itemExistente = carrinho.find(item => item.id === id)
+            
+            if (itemExistente) {
+                itemExistente.quantidade++
+            } else {
+                carrinho.push({
+                    ...produto,
+                    quantidade: 1
+                })
+            }
+            
+            localStorage.setItem('pegasus_carrinho', JSON.stringify(carrinho))
+            atualizarBadgeCarrinho()
+            
+            // Feedback visual
+            const toast = document.createElement('div')
+            toast.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#10b981; color:white; padding:16px 24px; border-radius:9999px; box-shadow:0 10px 15px -3px rgb(16 185 129);'
+            toast.textContent = `✅ ${produto.nome} adicionado!`
+            document.body.appendChild(toast)
+            setTimeout(() => toast.remove(), 2500)
+        }
+
+        function atualizarBadgeCarrinho() {
+            const totalItens = carrinho.reduce((acc, item) => acc + item.quantidade, 0)
+            const badge = document.getElementById('cart-count-badge')
+            const topBadge = document.getElementById('cart-count-top')
+            
+            if (badge) badge.textContent = totalItens
+            if (topBadge) topBadge.textContent = totalItens > 0 ? `(${totalItens})` : ''
+        }
+
+        // ==================== CARRINHO ====================
+        function renderizarCarrinho() {
+            const content = document.getElementById('cart-content')
+            const empty = document.getElementById('cart-empty')
+            
+            if (carrinho.length === 0) {
+                content.classList.add('hidden')
+                empty.classList.remove('hidden')
+                return
+            }
+            
+            empty.classList.add('hidden')
+            content.classList.remove('hidden')
+            
+            const container = document.getElementById('cart-items')
+            container.innerHTML = ''
+            
+            let totalGeral = 0
+            
+            carrinho.forEach((item, index) => {
+                const subtotal = item.preco * item.quantidade
+                totalGeral += subtotal
+                
+                const div = document.createElement('div')
+                div.className = 'flex gap-6 bg-zinc-800 rounded-3xl p-6'
+                div.innerHTML = `
+                <img src="${item.imagem}" class="w-24 h-24 object-contain rounded-2xl">
+                <div class="flex-1">
+                    <h4 class="font-semibold">${item.nome}</h4>
+                    <p class="text-sky-400">${item.categoria}</p>
+                    <div class="flex items-center gap-6 mt-4">
+                        <div class="flex items-center border border-zinc-600 rounded-3xl">
+                            <button onclick="alterarQuantidade(${index}, -1)" class="px-5 py-2 text-xl font-bold">-</button>
+                            <span class="px-6 font-semibold">${item.quantidade}</span>
+                            <button onclick="alterarQuantidade(${index}, 1)" class="px-5 py-2 text-xl font-bold">+</button>
+                        </div>
+                        <div class="text-right flex-1">
+                            <span class="text-emerald-400 text-2xl font-bold">R$ ${subtotal.toFixed(2)}</span>
+                        </div>
+                        <button onclick="removerDoCarrinho(${index})" class="text-red-400 hover:text-red-500 text-3xl">🗑️</button>
+                    </div>
+                </div>`
+                container.appendChild(div)
+            })
+            
+            document.getElementById('cart-total').textContent = `R$ ${totalGeral.toFixed(2)}`
+        }
+
+        function alterarQuantidade(index, delta) {
+            carrinho[index].quantidade += delta
+            if (carrinho[index].quantidade < 1) carrinho[index].quantidade = 1
+            localStorage.setItem('pegasus_carrinho', JSON.stringify(carrinho))
+            renderizarCarrinho()
+            atualizarBadgeCarrinho()
+        }
+
+        function removerDoCarrinho(index) {
+            carrinho.splice(index, 1)
+            localStorage.setItem('pegasus_carrinho', JSON.stringify(carrinho))
+            renderizarCarrinho()
+            atualizarBadgeCarrinho()
+        }
+
+        function enviarPedidoWhatsApp() {
+            if (carrinho.length === 0) return
+            
+            let mensagem = `🚀 *Novo Pedido - Pegasus Representações*%0A%0A`
+            
+            let total = 0
+            carrinho.forEach(item => {
+                const subtotal = item.preco * item.quantidade
+                total += subtotal
+                mensagem += `*${item.quantidade}x* ${item.nome} - R$ ${subtotal.toFixed(2)}%0A`
+            })
+            
+            mensagem += `%0A*TOTAL:* R$ ${total.toFixed(2)}%0A%0A`
+            mensagem += `✅ Enviado via Loja Virtual Pegasus`
+            
+            const numero = '5527995065360'
+            window.open(`https://wa.me/${numero}?text=${mensagem}`, '_blank')
+            
+            // Limpa carrinho após envio
+            setTimeout(() => {
+                carrinho = []
+                localStorage.setItem('pegasus_carrinho', JSON.stringify(carrinho))
+                renderizarCarrinho()
+                atualizarBadgeCarrinho()
+                alert('✅ Pedido enviado para o WhatsApp!')
+            }, 1000)
+        }
+
+        // ==================== CATEGORIAS ====================
+        function renderizarCategorias() {
+            const container = document.getElementById('categories-list')
+            container.innerHTML = ''
+            
+            categorias.forEach((cat, i) => {
+                const div = document.createElement('div')
+                div.className = 'bg-zinc-800 rounded-3xl px-6 py-5 flex justify-between items-center hover:bg-zinc-700 cursor-pointer'
+                div.innerHTML = `
+                <span class="font-medium">${cat}</span>
+                <button onclick="deletarCategoria(${i}); event.stopImmediatePropagation()" class="text-red-400 text-xl">🗑️</button>`
+                container.appendChild(div)
+            })
+            
+            // Preenche pills na loja
+            const pills = document.getElementById('category-pills')
+            pills.innerHTML = categorias.map(cat => `
+                <div onclick="filtrarPorCategoria('${cat}')" 
+                     class="bg-zinc-800 hover:bg-sky-900 text-white px-6 py-2 rounded-3xl cursor-pointer text-sm font-medium">
+                    📌 ${cat}
+                </div>`).join('')
+        }
+
+        function addCategory() {
+            const input = document.getElementById('new-category-input')
+            const nome = input.value.trim()
+            if (!nome) return
+            
+            if (!categorias.includes(nome)) {
+                categorias.push(nome)
+                localStorage.setItem('pegasus_categorias', JSON.stringify(categorias))
+                renderizarCategorias()
+                carregarSelectCategorias()
+                input.value = ''
+            }
+        }
+
+        function deletarCategoria(index) {
+            if (confirm('Excluir esta categoria?')) {
+                categorias.splice(index, 1)
+                localStorage.setItem('pegasus_categorias', JSON.stringify(categorias))
+                renderizarCategorias()
+                carregarSelectCategorias()
+            }
+        }
+
+        function filtrarPorCategoria(cat) {
+            showPage('loja')
+            document.getElementById('search-input').value = cat
+            renderizarProdutos(cat)
+        }
+
+        function carregarSelectCategorias() {
+            const select = document.getElementById('prod-categoria')
+            if (!select) return
+            select.innerHTML = categorias.map(c => `<option value="${c}">${c}</option>`).join('')
+        }
+
+        // ==================== CLIENTES ====================
+        function cadastrarCliente() {
+            const nome = document.getElementById('cli-nome').value.trim()
+            const telefone = document.getElementById('cli-telefone').value.trim()
+            const endereco = document.getElementById('cli-endereco').value.trim()
+            const login = document.getElementById('cli-login').value.trim()
+            const senha = document.getElementById('cli-senha').value.trim()
+            
+            if (!nome || !telefone) {
+                alert('Nome e telefone são obrigatórios!')
+                return
+            }
+            
+            clientes.push({ nome, telefone, endereco, login, senha })
+            localStorage.setItem('pegasus_clientes', JSON.stringify(clientes))
+            
+            // Limpa campos
+            document.getElementById('cli-nome').value = ''
+            document.getElementById('cli-telefone').value = ''
+            document.getElementById('cli-endereco').value = ''
+            document.getElementById('cli-login').value = ''
+            document.getElementById('cli-senha').value = ''
+            
+            alert('✅ Cliente cadastrado!')
+            renderizarListaClientesAdmin()
+        }
+
+        function renderizarListaClientesAdmin() {
+            const container = document.getElementById('lista-clientes-admin')
+            container.innerHTML = ''
+            
+            clientes.forEach(cliente => {
+                const card = document.createElement('div')
+                card.className = 'bg-zinc-800 rounded-3xl p-6 flex justify-between'
+                card.innerHTML = `
+                <div>
+                    <p class="font-semibold">${cliente.nome}</p>
+                    <p class="text-sky-400">${cliente.telefone}</p>
+                    <p class="text-sm text-zinc-400">${cliente.endereco}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs bg-zinc-700 px-4 py-1 rounded-3xl inline-block">${cliente.login}</p>
+                </div>`
+                container.appendChild(card)
+            })
+            
+            if (clientes.length === 0) {
+                container.innerHTML = `<p class="text-zinc-400 text-center py-8">Nenhum cliente cadastrado ainda.</p>`
+            }
+        }
+
+        function renderizarListaProdutosAdmin() {
+            const container = document.getElementById('lista-produtos-admin')
+            container.innerHTML = ''
+            
+            produtos.forEach((prod, index) => {
+                const div = document.createElement('div')
+                div.className = 'bg-zinc-800 rounded-3xl p-4 text-center'
+                div.innerHTML = `
+                <img src="${prod.imagem}" class="h-32 mx-auto object-contain mb-4 rounded-2xl">
+                <h5 class="font-medium text-lg">${prod.nome}</h5>
+                <p class="text-emerald-400">R$ ${prod.preco}</p>
+                <button onclick="deletarProduto(${index})" class="text-red-400 text-xs mt-4">Excluir</button>`
+                container.appendChild(div)
+            })
+        }
+
+        function deletarProduto(index) {
+            if (confirm('Excluir este produto?')) {
+                produtos.splice(index, 1)
+                localStorage.setItem('pegasus_produtos', JSON.stringify(produtos))
+                renderizarListaProdutosAdmin()
+                renderizarProdutos()
+            }
+        }
+
+        // ==================== INICIALIZAÇÃO ====================
+        function inicializarLoja() {
+            initTailwind()
+            
+            // Se não houver produtos, cria 3 exemplos
+            if (produtos.length === 0) {
+                produtos = [
+                    {
+                        id: 1,
+                        nome: "Kit Ferramentas Básico",
+                        imagem: "https://picsum.photos/id/1015/400/300",
+                        preco: 189.90,
+                        tabela1: "10 peças",
+                        tabela2: "Profissional",
+                        tabela3: "Garantia 1 ano",
+                        categoria: "Ferramentas"
+                    },
+                    {
+                        id: 2,
+                        nome: "Carregador Portátil 20.000mAh",
+                        imagem: "https://picsum.photos/id/201/400/300",
+                        preco: 89.90,
+                        tabela1: "USB-C",
+                        tabela2: "Fast Charge",
+                        tabela3: "2 saídas",
+                        categoria: "Eletrônicos"
+                    },
+                    {
+                        id: 3,
+                        nome: "Óleo Motor 5W30",
+                        imagem: "https://picsum.photos/id/301/400/300",
+                        preco: 45.00,
+                        tabela1: "5 litros",
+                        tabela2: "Sintético",
+                        tabela3: "Para diesel",
+                        categoria: "Automotivo"
+                    }
+                ]
+                localStorage.setItem('pegasus_produtos', JSON.stringify(produtos))
+            }
+            
+            atualizarBadgeCarrinho()
+            renderizarProdutos()
+            renderizarCategorias()
+            carregarSelectCategorias()
+            
+            console.log('%c✅ Loja Pegasus Representações carregada com sucesso!', 'color:#0ea5e9; font-size:18px; font-weight:bold')
+        }
+
+        // Inicia tudo
+        window.onload = inicializarLoja
+    </script>
+</body>
+</html>
+```
